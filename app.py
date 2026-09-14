@@ -1,6 +1,8 @@
 import joblib
 import pandas as pd
 import streamlit as st
+
+
 st.set_page_config(
     page_title="Netflix Churn Predictor",
     page_icon="📺",
@@ -13,15 +15,12 @@ def engineer_features(data):
     data["engagement_ratio"] = (
         data["watch_hours"] / (data["last_login_days"] + 1)
     )
-
     data["watch_per_profile"] = (
         data["watch_hours"] / data["number_of_profiles"]
     )
-
-    data["is_inactive_30"] = (
-        data["last_login_days"] > 30
-    ).astype(int)
+    data["is_inactive_30"] = int(data["last_login_days"] > 30)
     return pd.DataFrame([data])
+
 
 def main():
     st.title("📺 Netflix Customer Churn Predictor")
@@ -29,10 +28,12 @@ def main():
         "Enter customer information and usage details "
         "to predict whether the customer is likely to churn."
     )
+
     bundle = load_model()
     pipeline = bundle["pipeline"]
     threshold = bundle["threshold"]
     model_name = bundle.get("model_name", "Trained Model")
+
     st.subheader("Customer Information")
     col1, col2 = st.columns(2)
     with col1:
@@ -43,12 +44,10 @@ def main():
             value=35,
             step=1
         )
-
         gender = st.selectbox(
             "Gender",
             ["Male", "Female", "Other"]
         )
-
     with col2:
         region = st.selectbox(
             "Region",
@@ -61,7 +60,6 @@ def main():
                 "Oceania"
             ]
         )
-
         device = st.selectbox(
             "Primary Device",
             [
@@ -75,11 +73,11 @@ def main():
     st.subheader("Subscription Information")
     col3, col4 = st.columns(2)
     with col3:
+
         subscription_type = st.selectbox(
             "Subscription Type",
             ["Basic", "Standard", "Premium"]
         )
-
     with col4:
         payment_method = st.selectbox(
             "Payment Method",
@@ -99,7 +97,6 @@ def main():
         value=10.0,
         step=0.5
     )
-
     last_login_days = st.slider(
         "Days Since Last Login",
         min_value=0,
@@ -107,7 +104,6 @@ def main():
         value=15,
         step=1
     )
-
     avg_watch_time_per_day = st.slider(
         "Average Watch Time per Day (hours)",
         min_value=0.0,
@@ -115,7 +111,6 @@ def main():
         value=1.0,
         step=0.1
     )
-
     number_of_profiles = st.slider(
         "Number of Profiles",
         min_value=1,
@@ -123,7 +118,6 @@ def main():
         value=2,
         step=1
     )
-
     favorite_genre = st.selectbox(
         "Favorite Genre",
         [
@@ -136,7 +130,6 @@ def main():
             "Sci-Fi"
         ]
     )
-
     st.divider()
     if st.button(
         "Predict Churn",
@@ -168,10 +161,11 @@ def main():
         probability = pipeline.predict_proba(input_df)[0, 1]
         if probability >= threshold:
             prediction = "Churn"
+
         else:
+
             prediction = "No Churn"
         st.subheader("Prediction Result")
-
         st.metric(
             "Prediction",
             prediction
@@ -194,7 +188,5 @@ def main():
             "This prediction is based on historical data patterns "
             "and is not a guarantee of future customer behavior."
         )
-
-
 if __name__ == "__main__":
     main()
